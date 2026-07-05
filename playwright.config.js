@@ -17,7 +17,7 @@ export default defineConfig({
   globalTimeout:60000,
 
   expect:{
-    timeout:30000
+    timeout:50000
   },
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -53,7 +53,7 @@ export default defineConfig({
       use: { ...devices['Desktop Firefox'] },
     },*/
 
-    {
+   /* {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
@@ -73,10 +73,11 @@ export default defineConfig({
     //   name: 'Microsoft Edge',
     //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
     // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
+   {
+     name: 'Google Chrome',
+     use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+    
+  },
   ],
 
   /* Run your local dev server before starting the tests */

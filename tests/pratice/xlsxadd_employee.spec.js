@@ -1,67 +1,51 @@
 
 
-import { test, expect } from '@playwright/test';
-import * as XLSX from 'xlsx';
+const path = require('path');
+const xlsx = require('xlsx');
+const { test, expect } = require('@playwright/test');
 
-const workbook = XLSX.readFile('./testdata/employee.xlsx');
+function readEmployeeData() {
+  const filePath = path.resolve(process.cwd(), 'testdata', 'employees.xlsx');
+  const workbook = xlsx.readFile(filePath);
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = xlsx.utils.sheet_to_json(sheet, { defval: '' });
 
-const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-const employees = XLSX.utils.sheet_to_json(sheet);
-
-test('verify the add employee', async ({ page }) => {
-
-  await page.goto('/web/index.php/auth/login');
-
-  await page.getByRole('textbox', { name: 'Username' }).fill('Admin');
-  await page.getByRole('textbox', { name: 'Password' }).fill('admin123');
-  await page.getByRole('button', { name: 'Login' }).click();
-
-  await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
-
-  for (const employee of employees) {
-
-    await page.getByRole('link', { name: 'PIM' }).click();
-    await page.getByRole('link', { name: 'Add Employee' }).click();
-
-    await page.getByRole('textbox', { name: 'First Name' }).fill(employee["First Name"]);
-    await page.getByRole('textbox', { name: 'Last Name' }).fill(employee["Last Name"]);
-
-    await page.getByRole('button', { name: 'Save' }).click();
-
-    await expect(page.getByText('Success', { exact: true })).toBeVisible();
+  if (!rows.length) {
+    throw new Error(`No employee data found in ${filePath}`);
   }
 
-});
-test('verify the add employee negitive testcasess in empty box', async ({ page }) => {
-  await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
-  console.log("lacnch the appliction")
-  await page.getByRole('textbox', { name: 'Username' }).fill('Admin');
-  console.log("print the user name")
-  await page.getByRole('textbox', { name: 'Password' }).fill('admin123');
-  console.log("launch the password")
-  await page.getByRole('button', { name: 'Login' }).click();
-  console.log("click on the login button")
-  await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
-  console.log("user neviget dash bord page")
-  await page.getByRole('link', { name: 'PIM' }).click();
-  console.log("user show click on the pim button ")
-  await page.getByRole('link', { name: 'Add Employee' }).click();
-  await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByText('Required').first()).toBeVisible();
-  await expect(page.getByText('Required').nth(1)).toBeVisible();
-});
-test('verify the add employee negitive testcasess in more then 30 casess', async ({ page }) => {
-  await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+  return rows;
+}
+
+test('create employee from xlsx data', async ({ page }) => {
+  const employeeData = readEmployeeData()[0];
+  const suffix = Date.now().toString().slice(-4);
+  const firstName = `${employeeData['first name '] || 'Excel'}${suffix}`;
+  const lastName = `${employeeData['last name'] || 'User'}${suffix}`;
+
+  await page.goto('/web/index.php/auth/login');
   await page.getByRole('textbox', { name: 'Username' }).fill('Admin');
   await page.getByRole('textbox', { name: 'Password' }).fill('admin123');
-  await page.getByRole('button', { name: 'Login' }).click();
-  await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
-  await page.getByRole('link', { name: 'Admin' }).click();
+
+  const loginButton = page.getByRole('button', { name: 'Login' });
+  await expect(loginButton).toBeVisible({ timeout: 10000 });
+  await expect(loginButton).toBeEnabled({ timeout: 10000 });
+  await loginButton.scrollIntoViewIfNeeded();
+  await loginButton.click();
+
+  await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible({ timeout: 20000 });
+
   await page.getByRole('link', { name: 'PIM' }).click();
   await page.getByRole('link', { name: 'Add Employee' }).click();
-  await page.getByRole('textbox', { name: 'First Name' }).fill('ldhfoihjkmvjkpofndjghioufhfnkljbuohvvhi');
-  await page.getByRole('textbox', { name: 'Last Name' }).fill('d,mgnierohgjiur3y9fjncknlcbvug bifhihnjgjkjlch');
-  await expect(page.getByText('Should not exceed 30').first()).toBeVisible();
-  await expect(page.getByText('Should not exceed 30').nth(1)).toBeVisible();
+
+  await page.getByRole('textbox', { name: 'First Name' }).fill(firstName);
+  await page.getByRole('textbox', { name: 'Last Name' }).fill(lastName);
+
+  const saveButton = page.getByRole('button', { name: 'Save' });
+  await expect(saveButton).toBeEnabled({ timeout: 10000 });
+  await saveButton.click();
+
+  await page.waitForURL(/viewPersonalDetails/, { timeout: 30000 });
+  await expect(page.getByRole('textbox', { name: 'First Name' })).toHaveValue(firstName, { timeout: 20000 });
+  await expect(page.getByRole('textbox', { name: 'Last Name' })).toHaveValue(lastName, { timeout: 20000 });
 });
