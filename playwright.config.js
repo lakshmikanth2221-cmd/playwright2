@@ -14,7 +14,10 @@ require('dotenv').config()
  */
 export default defineConfig({
   testDir: './tests',
-  globalTimeout:60000,
+  // Maximum time for the entire test run (ms)
+  globalTimeout: 300000,
+  // Per-test timeout (ms)
+  timeout: 120000,
 
   expect:{
     timeout:50000

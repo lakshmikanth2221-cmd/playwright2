@@ -1,6 +1,10 @@
 {
-    "username":"Admin",
-    "password":"admin123",
-    "wrongusername":"lakshmi",
-    "wrongpassword":"kanth"
+  "username": "Admin",
+  "password": "admin123",
+  "wrongusername": "lakshmi",
+  "wrongpassword": "kanth",
+  "logout": {
+    "expectedLogoutUrl": "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login",
+    "logoutMenuItem": "Logout"
+  }
 }

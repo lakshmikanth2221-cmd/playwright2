@@ -1,0 +1,21 @@
+const { chromium } = require("playwright");
+const fs = require("fs");
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  await page.goto("https://opensource-demo.orangehrmlive.com/web/index.php/auth/login");
+  await page.fill('input[name="username"]', 'Admin');
+  await page.fill('input[name="password"]', 'admin123');
+  await page.click('button:has-text("Login")');
+  await page.waitForNavigation({ waitUntil: 'networkidle' }).catch(() => {});
+  await page.click('a:has-text("PIM")');
+  await page.click('a:has-text("Add Employee")');
+  await page.waitForTimeout(3000);
+  const html = await page.content();
+  fs.writeFileSync('page-add-employee.html', html, 'utf8');
+  const labels = await page.$$eval('label', els => els.map(l => ({ text: l.innerText, html: l.outerHTML })));
+  const inputs = await page.$$eval('input', els => els.map(i => ({ name: i.name, id: i.id, placeholder: i.placeholder, class: i.className, outerHTML: i.outerHTML })));
+  console.log('LABELS', JSON.stringify(labels, null, 2));
+  console.log('INPUTS', JSON.stringify(inputs, null, 2));
+  await browser.close();
+})();
