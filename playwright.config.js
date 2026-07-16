@@ -15,7 +15,7 @@ require('dotenv').config()
 export default defineConfig({
   testDir: './tests',
   // Maximum time for the entire test run (ms)
-  globalTimeout: 300000,
+  globalTimeout: 30000,
   // Per-test timeout (ms)
   timeout: 120000,
 
@@ -26,10 +26,10 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 1,
+  /* Retry failed tests */
+  retries: 2,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 :1,
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [["html"],["junit"]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -39,12 +39,13 @@ export default defineConfig({
     baseURL:"https://opensource-demo.orangehrmlive.com/",
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    screenshot:"on-first-failure",
-    video:"retain-on-first-failure",
-    trace: 'on-first-retry'
+    screenshot: 'on-first-failure',
+    video: 'retain-on-first-failure',
+    trace: 'on-first-retry',
+    headless: false,
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projectsx for major browsers */
   projects: [
    /* {
       name: 'chromium',

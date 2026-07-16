@@ -10,7 +10,8 @@ test('verify the job title', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Password' }).fill(logindata.password);
   await page.getByRole('button', { name: 'Login' }).click();
   await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
-  await page.getByRole('link', { name: 'Admin' }).click();
+  await page.getByRole('link', { name: 'Admin' }).click()
+  await page.waitForTimeout(200000);
   await page.getByRole('listitem').filter({ hasText: 'Job' }).click();
   await page.getByRole('listitem').filter({ hasText: /^Job Titles$/ }).click();
   await expect(page.getByText('Job Titles Add')).toBeVisible();
